@@ -1,6 +1,7 @@
 <?php
 
 use App\Bot\Commands\BindCommand;
+use App\Bot\Commands\BindUpdateCommand;
 use App\Bot\Commands\GetFCCommand;
 use App\Bot\Commands\HelpCommand;
 use App\Bot\Commands\ListCommand;
@@ -69,5 +70,6 @@ return [
         QuotaCommand::class,
         ListCommand::class,
         GetFCCommand::class,
+        BindUpdateCommand::class,
     ],
 ];
