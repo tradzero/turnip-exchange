@@ -6,7 +6,9 @@ trait ValidTrait
 {
     protected function checkTime()
     {
-        return true;
+        if (config('turnip.debug')) {
+            return true;
+        }
         $now = now()->timezone('Asia/Shanghai');
 
         if ($now->isSunday()) {
