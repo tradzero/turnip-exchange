@@ -57,12 +57,30 @@ class ListCommand extends Command
             $characterName = $price->user->character_name;
             $islandName = $price->user->island_name;
 
-            $responseText .= "{$rank} - 报价 : *{$quota}*  -  FC: {$fcCode}";
+            $responseText .= "{$rank} - 报价 : <b>{$quota}</b>  -  FC: {$fcCode}";
             if ($characterName) {
                 $responseText .= "  -  角色名: {$characterName}  -  岛名: {$islandName}";
             }
             $responseText .= PHP_EOL;
         }
-        $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'Markdown']);
+
+        if ($prices->count() > 0) {
+            $lowestPrice = Price::with('user')
+                ->where('date', $date)
+                ->where('type', $type)
+                ->orderBy('price', 'asc')
+                ->first();
+
+            $quota = $lowestPrice->price;
+            $fcCode = $lowestPrice->user->friend_code_id;
+            $characterName = $lowestPrice->user->character_name;
+            $islandName = $lowestPrice->user->island_name;
+
+            $responseText .= "本时段<del>欧皇</del>报价: <b>{$quota}</b> -  FC: <del>{$fcCode}</del>";
+            if ($characterName) {
+                $responseText .= "  -  角色名: <del>{$characterName}</del>  -  岛名: <del>{$islandName}</del>";
+            }
+        }
+        $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'HTML']);
     }
 }
