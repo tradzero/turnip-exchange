@@ -40,7 +40,7 @@ class ListCommand extends Command
             ->where('date', $date)
             ->where('type', $type)
             ->orderBy('price', 'desc')
-            ->limit(10)
+            ->limit(5)
             ->get();
 
         if ($prices->count() == 0) {
@@ -48,7 +48,7 @@ class ListCommand extends Command
             return ;
         }
         $typeString = $type == Price::TYPE_MORNING ? '上午' : '下午';
-        $responseText = "今日 : {$date->toDateString()} {$typeString} 最高报价(最多显示十条) : " . PHP_EOL;
+        $responseText = "今日 : {$date->toDateString()} {$typeString} 最高报价(最多显示五条) : " . PHP_EOL;
 
         foreach ($prices as $rank => $price) {
             $rank = $rank + 1;
@@ -57,12 +57,12 @@ class ListCommand extends Command
             $characterName = $price->user->character_name;
             $islandName = $price->user->island_name;
 
-            $responseText .= "{$rank} - 报价 : {$quota}  -  FC: {$fcCode}";
+            $responseText .= "{$rank} - 报价 : *{$quota}*  -  FC: {$fcCode}";
             if ($characterName) {
                 $responseText .= "  -  角色名: {$characterName}  -  岛名: {$islandName}";
             }
             $responseText .= PHP_EOL;
         }
-        $this->replyWithMessage(['text' => $responseText]);
+        $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'Markdown']);
     }
 }

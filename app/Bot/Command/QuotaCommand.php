@@ -51,9 +51,7 @@ class QuotaCommand extends Command
 
         $type = $hour >= 12 ? Price::TYPE_AFTERNOON : Price::TYPE_MORNING;
 
-        Price::updateOrCreate(['user_id' => $user->id, 'date' => $date], [
-            'type' => $type,
-            'date' => $date,
+        Price::updateOrCreate(['user_id' => $user->id, 'date' => $date, 'type'=> $type], [
             'price' => (int) $price,
         ]);
 
