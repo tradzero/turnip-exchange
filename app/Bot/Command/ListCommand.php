@@ -64,7 +64,7 @@ class ListCommand extends Command
             $responseText .= PHP_EOL;
         }
 
-        if ($prices->count() > 0) {
+        if ($prices->count() > 1) {
             $lowestPrice = Price::with('user')
                 ->where('date', $date)
                 ->where('type', $type)
