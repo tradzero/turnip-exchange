@@ -34,12 +34,20 @@ class ListCommand extends Command
         $now = now()->timezone('Asia/Shanghai')->toImmutable();
         $date = $now->startOfDay();
         $hour = $now->hour;
-        $type = $hour >= 12 ? Price::TYPE_AFTERNOON : Price::TYPE_MORNING;
 
+        $isSunday = $now->isSunday();
+
+        if ($isSunday) {
+            $type = Price::TYPE_SUNDAY;
+        } else {
+            $type = $hour >= 12 ? Price::TYPE_AFTERNOON : Price::TYPE_MORNING;
+        }
+
+        $orderBy = $isSunday ? 'asc' : 'desc';
         $prices = Price::with('user')
             ->where('date', $date)
             ->where('type', $type)
-            ->orderBy('price', 'desc')
+            ->orderBy('price', $orderBy)
             ->limit(5)
             ->get();
 
@@ -48,7 +56,12 @@ class ListCommand extends Command
             return ;
         }
         $typeString = $type == Price::TYPE_MORNING ? '上午' : '下午';
-        $responseText = "今日 : {$date->toDateString()} {$typeString} 最高报价(最多显示五条) : " . PHP_EOL;
+
+        if ($isSunday) {
+            $responseText = "今日 : {$date->toDateString()} 为收购日 本日收购价排行 从低到高 (最多显示五条)" . PHP_EOL;
+        } else {
+            $responseText = "今日 : {$date->toDateString()} {$typeString} 最高报价(最多显示五条) : " . PHP_EOL;
+        }
 
         foreach ($prices as $rank => $price) {
             $rank = $rank + 1;
@@ -64,7 +77,7 @@ class ListCommand extends Command
             $responseText .= PHP_EOL;
         }
 
-        if ($prices->count() > 1) {
+        if ($prices->count() > 1 && !$isSunday) {
             $lowestPrice = Price::with('user')
                 ->where('date', $date)
                 ->where('type', $type)

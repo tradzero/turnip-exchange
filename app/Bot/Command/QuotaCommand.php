@@ -15,6 +15,8 @@ class QuotaCommand extends Command
 
     protected $description = "添加大头菜报价";
 
+    protected $isSunday;
+
     public function handle($arguments)
     {
         $price = $arguments;
@@ -48,8 +50,12 @@ class QuotaCommand extends Command
         $now = now()->timezone('Asia/Shanghai')->toImmutable();
         $date = $now->startOfDay();
         $hour = $now->hour;
-
-        $type = $hour >= 12 ? Price::TYPE_AFTERNOON : Price::TYPE_MORNING;
+        $this->isSunday = $now->isSunday();
+        if ($this->isSunday) {
+            $type = Price::TYPE_SUNDAY;
+        } else {
+            $type = $hour >= 12 ? Price::TYPE_AFTERNOON : Price::TYPE_MORNING;
+        }
 
         Price::updateOrCreate(['user_id' => $user->id, 'date' => $date, 'type'=> $type], [
             'price' => (int) $price,
@@ -64,8 +70,14 @@ class QuotaCommand extends Command
             $this->replyWithMessage(['text' => '价格错误 请使用 /add [价格] 添加报价']);
             return false;
         }
-        if (! is_numeric($price) || $price < 0 || $price > 1000) {
-            $this->replyWithMessage(['text' => '请输入正确的价格格式 区间为0-1000']);
+        $minPrice = 0;
+        $maxPrice = 1000;
+        if ($this->isSunday) {
+            $minPrice = 90;
+            $maxPrice = 110;
+        }
+        if (! is_numeric($price) || $price < $minPrice || $price > $maxPrice) {
+            $this->replyWithMessage(['text' => "请输入正确的价格格式 区间为{$minPrice}-{$maxPrice}"]);
             return false;
         }
 
