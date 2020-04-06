@@ -66,7 +66,7 @@ class WeekCommand extends Command
         $textString .= PHP_EOL;
 
         $queryString = '';
-        if ($prices[0] == '-') {
+        if ($prices[0][2] == '-') {
             $queryString = '未录入星期日数据 无法生成查询数据';
         } else {
             $queryString = '查询数据: 直接复制到Inline input: 即可查看预测'. PHP_EOL;
