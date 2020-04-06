@@ -11,7 +11,7 @@ class WeekCommand extends Command
 {
     protected $name = "week";
 
-    protected $description = "查看自己本周报价信息";
+    protected $description = "查看本周报价录入信息";
 
     public function handle($arguments)
     {
