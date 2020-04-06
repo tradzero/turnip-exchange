@@ -7,6 +7,7 @@ use App\Bot\Commands\HelpCommand;
 use App\Bot\Commands\ListCommand;
 use App\Bot\Commands\QuotaCommand;
 use App\Bot\Commands\StartCommand;
+use App\Bot\Commands\WeekCommand;
 
 return [
     /*
@@ -71,5 +72,6 @@ return [
         ListCommand::class,
         GetFCCommand::class,
         BindUpdateCommand::class,
+        WeekCommand::class,
     ],
 ];
