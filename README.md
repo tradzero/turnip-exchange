@@ -8,3 +8,4 @@ telegram bot
 3. 优化add 及 bind/bindupdate 改为inline command  
 4. 优化消息系统 避免时而命令无效  
 5. 升级telegram 拓展包版本 增加自毁命令  
+6. forward 消息不处理
