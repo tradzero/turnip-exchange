@@ -23,4 +23,24 @@ trait ValidTrait
         }
         return true;
     }
+
+    protected function checkPrice($price)
+    {
+        if ($price == '') {
+            $this->replyWithMessage(['text' => '价格错误 请使用 /add [价格] 添加报价']);
+            return false;
+        }
+        $minPrice = 1;
+        $maxPrice = 1000;
+        if (now()->isSunday()) {
+            $minPrice = 90;
+            $maxPrice = 110;
+        }
+        if (! is_numeric($price) || $price < $minPrice || $price > $maxPrice) {
+            $this->replyWithMessage(['text' => "请输入正确的价格格式 区间为{$minPrice}-{$maxPrice}"]);
+            return false;
+        }
+
+        return true;
+    }
 }

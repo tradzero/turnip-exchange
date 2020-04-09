@@ -1,5 +1,8 @@
 <?php
 
 return [
-    'debug' => false
+    'debug' => false,
+    'admins' => [
+        env('BOT_ADMIN_TG_ID')
+    ]
 ];

@@ -2,6 +2,7 @@
 
 use App\Bot\Commands\BindCommand;
 use App\Bot\Commands\BindUpdateCommand;
+use App\Bot\Commands\ForceAddCommand;
 use App\Bot\Commands\GetFCCommand;
 use App\Bot\Commands\HelpCommand;
 use App\Bot\Commands\ListCommand;
@@ -73,5 +74,6 @@ return [
         GetFCCommand::class,
         BindUpdateCommand::class,
         WeekCommand::class,
+        ForceAddCommand::class,
     ],
 ];
