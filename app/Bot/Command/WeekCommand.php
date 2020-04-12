@@ -28,6 +28,11 @@ class WeekCommand extends Command
         $start = $now->subWeek()->endOfWeek()->startOfDay();
         $end = $now->endOfWeek()->subDay()->endOfDay();
 
+        if ($now->isSunday()) {
+            $start = $now->endOfWeek()->startOfDay();
+            $end = $now->nextWeekendDay()->subDay()->endOfDay();
+        }
+
         $records = $user->prices()->whereBetween('date', [$start, $end])->get();
 
         if ($records->count() == 0) {

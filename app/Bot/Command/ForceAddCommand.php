@@ -79,8 +79,11 @@ class ForceAddCommand extends Command
         $text = $replyTo->getText();
 
         if (Str::startsWith($text, '/add')) {
+            $replyText = Str::before(Str::after($text, '/add'), ' ');
             $price = Str::replaceFirst('/add', '', $text);
             $price = Str::replaceFirst(' ', '', $price);
+            $price = Str::replaceFirst($replyText, '', $price);
+            
             $price = (int) $price;
             return $price;
         } else {

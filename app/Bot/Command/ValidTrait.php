@@ -11,6 +11,10 @@ trait ValidTrait
         }
         $now = now()->timezone('Asia/Shanghai');
 
+        if ($now->isSunday()) {
+            return true;
+        }
+
         $hour = $now->hour;
         if ($hour >= 0 && $hour < 8) {
             $this->replyWithMessage(['text' => '早上8点才开市']);
