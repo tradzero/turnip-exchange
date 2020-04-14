@@ -40,9 +40,7 @@ class WeekCommand extends Command
             return ;
         }
 
-        $queryUrl = 'https://juo6442.github.io/moothumb/';
-
-        $baseText = "本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
+        $queryUrl = 'https://ac-turnip.com/#';
 
         $period = $start->daysUntil($end);
         $prices = [];
@@ -61,25 +59,20 @@ class WeekCommand extends Command
                 $prices[$index][$type] = $price;
             }
         }
+        $queryString = '';
 
         $headerText = '| Sun | Mon | Tue | Wed | Thu | Fri | Sat |' . PHP_EOL;
         $textString = '| ';
         foreach ($prices as $price) {
             $textString .= implode('/', $price) . ' | ';
+            
+            $queryString .= implode(',', $price);
+            $queryString .= ',';
         }
+        $queryString = str_replace('-', '', $queryString);
+        $queryUrl = $queryUrl . rtrim($queryString, ',');
 
-        $textString .= PHP_EOL;
-
-        $queryString = '';
-        if ($prices[0][2] == '-') {
-            $queryString = '未录入星期日数据 无法生成查询数据';
-        } else {
-            $queryString = '查询数据: 直接复制到Inline input: 即可查看预测'. PHP_EOL;
-            foreach ($prices as $price) {
-                $queryString .= implode('/', $price) . ' ';
-            }
-            $queryString = str_replace('-', '', $queryString);
-        }
+        $baseText = "本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
 
         $responseText = $baseText . $headerText . $textString . $queryString;
         $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'Markdown']);
