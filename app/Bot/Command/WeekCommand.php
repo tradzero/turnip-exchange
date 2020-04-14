@@ -74,7 +74,7 @@ class WeekCommand extends Command
 
         $baseText = "本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
 
-        $responseText = $baseText . $headerText . $textString . $queryString;
+        $responseText = $baseText . $headerText . $textString;
         $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'Markdown']);
     }
 }
