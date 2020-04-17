@@ -55,7 +55,7 @@ class WeekCommand extends Command
             }
             foreach ($queryTypes as $type) {
                 $record = $records->where('date', $day)->where('type', $type)->first();
-                $price = $record ? $record->price : '-';
+                $price = $record ? $record->price : '$';
                 $prices[$index][$type] = $price;
             }
         }
@@ -66,11 +66,11 @@ class WeekCommand extends Command
         foreach ($prices as $price) {
             $textString .= implode('/', $price) . ' | ';
             
-            $queryString .= implode(',', $price);
-            $queryString .= ',';
+            $queryString .= implode('-', $price);
+            $queryString .= '-';
         }
-        $queryString = str_replace('-', '', $queryString);
-        $queryUrl = $queryUrl . rtrim($queryString, ',');
+        $queryString = str_replace('$', '', $queryString);
+        $queryUrl = $queryUrl . rtrim($queryString, '-');
 
         $baseText = "本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
 
