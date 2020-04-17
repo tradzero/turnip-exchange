@@ -40,7 +40,7 @@ class WeekCommand extends Command
             return ;
         }
 
-        $queryUrl = 'https://ac-turnip.com/p';
+        $baseUrl = 'https://ac-turnip.com/';
 
         $period = $start->daysUntil($end);
         $prices = [];
@@ -69,10 +69,16 @@ class WeekCommand extends Command
             $queryString .= implode('-', $price);
             $queryString .= '-';
         }
-        $queryString = str_replace('$', '', $queryString);
-        $queryUrl = $queryUrl . rtrim($queryString, '-') . '.png';
 
-        $baseText = "本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
+        $queryString = str_replace('$', '', $queryString);
+        $queryString = rtrim($queryString, '-');
+
+        $queryUrl = $baseUrl . '#' . $queryString;
+
+        $previewUrl = $baseUrl . 'p-' . $queryString . '.png';
+        
+
+        $baseText = "[趋势预览]({$previewUrl}) 本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
 
         $responseText = $baseText . $headerText . $textString;
         $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'Markdown']);
