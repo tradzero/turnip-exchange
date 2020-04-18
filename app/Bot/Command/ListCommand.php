@@ -15,7 +15,7 @@ class ListCommand extends UserCommand
     protected $name = "list";
 
     protected $description = "列出当前最高报价 仅显示最高十条";
-    protected $usage = '/test';
+    protected $usage = '/list';
 
     public function execute()
     {

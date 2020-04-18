@@ -1,26 +1,29 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use App\Models\Price;
 use App\Models\User;
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
 
-class WeekCommand extends Command
+class WeekCommand extends UserCommand
 {
     protected $name = "week";
 
     protected $description = "查看本周报价录入信息";
 
-    public function handle($arguments)
+    public function execute()
     {
         $from = $this->update->getMessage()->getFrom();
+
+        $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
 
         $tgid = $from->getId();
         $user = User::where('tg_id', $tgid)->first();
         if (! $user) {
-            $this->replyWithMessage(['text' => '请先使用/bind 绑定fc']);
+            Request::sendMessage(['text' => '请先使用/bind 绑定fc', 'chat_id' => $chatId]);
             return ;
         }
         
@@ -36,7 +39,7 @@ class WeekCommand extends Command
         $records = $user->prices()->whereBetween('date', [$start, $end])->get();
 
         if ($records->count() == 0) {
-            $this->replyWithMessage(['text' => '本周您未填写过报价, 请记得使用/add 添加报价']);
+            Request::sendMessage(['text' => '本周您未填写过报价, 请记得使用/add 添加报价', 'chat_id' => $chatId]);
             return ;
         }
 
@@ -81,6 +84,6 @@ class WeekCommand extends Command
         $baseText = "[趋势预览]({$previewUrl}) 本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
 
         $responseText = $baseText . $headerText . $textString;
-        $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'Markdown']);
+        Request::sendMessage(['text' => $responseText, 'parse_mode' => 'Markdown', 'chat_id' => $chatId]);
     }
 }
