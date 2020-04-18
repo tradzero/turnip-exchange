@@ -8,6 +8,7 @@ use App\Bot\Commands\HelpCommand;
 use App\Bot\Commands\ListCommand;
 use App\Bot\Commands\QuotaCommand;
 use App\Bot\Commands\StartCommand;
+use App\Bot\Commands\TestCommand;
 use App\Bot\Commands\WeekCommand;
 
 return [
@@ -24,7 +25,7 @@ return [
     |
     */
     'bot_token' => env('TELEGRAM_BOT_TOKEN', 'YOUR-BOT-TOKEN'),
-
+    'bot_username' => env('TELEGRAM_USERNAME'),
     /*
     |--------------------------------------------------------------------------
     | Asynchronous Requests [Optional]
@@ -75,5 +76,6 @@ return [
         BindUpdateCommand::class,
         WeekCommand::class,
         ForceAddCommand::class,
+        TestCommand::class,
     ],
 ];

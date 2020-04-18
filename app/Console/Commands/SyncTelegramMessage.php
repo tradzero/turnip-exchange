@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Telegram\Bot\Laravel\Facades\Telegram;
+use Longman\TelegramBot\Telegram;
 
 class SyncTelegramMessage extends Command
 {
@@ -21,7 +21,16 @@ class SyncTelegramMessage extends Command
     {
         while (true) {
             try {
-                Telegram::commandsHandler(false, ['timeout' => 30]);
+                $telegram = get_telegram();
+                $telegram->useGetUpdatesWithoutDatabase();
+                $data = $telegram->handleGetUpdates();
+                if ($data->isOk()) {
+                    $updateCount = count($data->getResult());
+                    dump(date('Y-m-d H:i:s', time()) . ' - Processed ' . $updateCount . ' updates');
+                } else {
+                    $this->error(date('Y-m-d H:i:s', time()) . ' - Failed to fetch updates' . PHP_EOL);
+                    $this->error($data->printError());
+                }
             } catch (Exception $ex) {
                 $this->error($ex->getMessage());
             }
