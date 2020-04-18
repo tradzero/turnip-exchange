@@ -1,25 +1,29 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use App\Models\User;
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
 
-class GetFCCommand extends Command
+class GetFCCommand extends UserCommand
 {
     protected $name = "getfc";
 
     protected $description = "获取fc";
 
-    public function handle($arguments)
+    public function execute()
     {
+        $arguments = $this->getMessage()->getText(true);
         $from = $this->update->getMessage()->getFrom();
 
+        $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
+        
         $replyTo = $this->update->getMessage()->getReplyToMessage();
 
         if (! $replyTo) {
-            $this->replyWithMessage(['text' => '该命令仅用于获取回复消息者的FC']);
+            Request::sendMessage(['text' => '该命令仅用于获取回复消息者的FC', 'chat_id' => $chatId]);
             return ;
         }
 
@@ -27,7 +31,7 @@ class GetFCCommand extends Command
 
         $user = User::where('tg_id', $replyUser)->first();
         if (! $user) {
-            $this->replyWithMessage(['text' => '该用户未绑定fc']);
+            Request::sendMessage(['text' => '该用户未绑定fc', 'chat_id' => $chatId]);
             return ;
         }
 
@@ -39,6 +43,6 @@ class GetFCCommand extends Command
             $responseText .= "  -  角色名: {$characterName}  -  岛名: {$islandName}";
         }
 
-        $this->replyWithMessage(['text' => $responseText]);
+        Request::sendMessage(['text' => $responseText, 'chat_id' => $chatId]);
     }
 }

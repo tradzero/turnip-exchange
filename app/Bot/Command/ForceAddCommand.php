@@ -1,35 +1,42 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use App\Models\Price;
 use App\Models\User;
 use Illuminate\Support\Str;
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
+use App\Bot\Commands\ValidTrait;
 
-class ForceAddCommand extends Command
+class ForceAddCommand extends UserCommand
 {
     use ValidTrait;
 
     protected $name = 'forceadd';
+    protected $chatId;
 
     protected $description = "当命令失效时 强制添加报价 请在reply中使用";
 
-    public function handle($arguments)
+    public function execute()
     {
+        $arguments = $this->getMessage()->getText(true);
         $from = $this->update->getMessage()->getFrom();
+
+        $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
+        $this->chatId = $chatId;
 
         $replyTo = $this->update->getMessage()->getReplyToMessage();
         if (! $replyTo) {
-            $this->replyWithMessage(['text' => '请在reply中使用']);
+            Request::sendMessage(['text' => '请在reply中使用', 'chat_id' => $chatId]);
             return ;
         }
 
         $chat = $this->update->getMessage()->getChat();
         $chatType = $chat->getType();
         if ($chatType != 'group' && $chatType != 'supergroup') {
-            $this->replyWithMessage(['text' => '请在群组中使用该命令']);
+            Request::sendMessage(['text' => '请在群组中使用该命令', 'chat_id' => $chatId]);
             return;
         }
 
@@ -45,7 +52,7 @@ class ForceAddCommand extends Command
 
         $price = $this->checkReplyCommand($replyTo);
         if ($price === false) {
-            $this->replyWithMessage(['text' => '格式错误 请使用 /add [价格] 添加报价']);
+            Request::sendMessage(['text' => '格式错误 请使用 /add [价格] 添加报价', 'chat_id' => $chatId]);
             return ;
         }
 
@@ -55,7 +62,7 @@ class ForceAddCommand extends Command
 
         $user = User::where('tg_id', $replyUser)->first();
         if (!$user) {
-            $this->replyWithMessage(['text' => '请先使用/bind 绑定fc']);
+            Request::sendMessage(['text' => '请先使用/bind 绑定fc', 'chat_id' => $chatId]);
             return;
         }
 
@@ -71,7 +78,7 @@ class ForceAddCommand extends Command
 
         Price::quota($user, $price);
 
-        $this->replyWithMessage(['text' => '报价已更新']);
+        Request::sendMessage(['text' => '报价已更新', 'chat_id' => $chatId]);
     }
 
     protected function checkReplyCommand($replyTo)
@@ -89,17 +96,5 @@ class ForceAddCommand extends Command
         } else {
             return false;
         }
-    }
-
-    protected function vaildateFriendCode($friendCode)
-    {
-        $friendCode = strtoupper($friendCode);
-        $regex = '/^SW-[0-9]{4}-[0-9]{4}-[0-9]{4}$/';
-        $result = preg_match($regex, $friendCode);
-        if (! $result) {
-            $this->replyWithMessage(['text' => 'FC格式错误 正确格式为 SW-1234-1111-1111']);
-            return false;
-        }
-        return true;
     }
 }
