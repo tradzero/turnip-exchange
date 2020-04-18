@@ -26,7 +26,9 @@ class SyncTelegramMessage extends Command
                 $data = $telegram->handleGetUpdates();
                 if ($data->isOk()) {
                     $updateCount = count($data->getResult());
-                    dump(date('Y-m-d H:i:s', time()) . ' - Processed ' . $updateCount . ' updates');
+                    if ($updateCount) {
+                        dump(date('Y-m-d H:i:s', time()) . ' - Processed ' . $updateCount . ' updates');
+                    }
                 } else {
                     $this->error(date('Y-m-d H:i:s', time()) . ' - Failed to fetch updates' . PHP_EOL);
                     $this->error($data->printError());

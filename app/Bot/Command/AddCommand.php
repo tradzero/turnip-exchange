@@ -1,38 +1,44 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use App\Models\Price;
 use App\Models\User;
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
+use App\Bot\Commands\ValidTrait;
 
-class QuotaCommand extends Command
+class AddCommand extends UserCommand
 {
     use ValidTrait;
 
     protected $name = "add";
 
     protected $description = "添加大头菜报价";
+    protected $usage = '/add <price>';
 
     protected $isSunday;
 
-    public function handle($arguments)
+    public function execute()
     {
-        $price = $arguments;
+        $arguments = $this->getMessage()->getText(true);
 
+        $price = $arguments;
+        
         $from = $this->update->getMessage()->getFrom();
         $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
+
         $chatType = $chat->getType();
         if ($chatType != 'group' && $chatType != 'supergroup') {
-            $this->replyWithMessage(['text' => '请在群组中使用该命令']);
+            Request::sendMessage(['text' => '请在群组中使用该命令', 'chat_id' => $chatId]);
             return;
         }
 
         $tgid = $from->getId();
         $user = User::where('tg_id', $tgid)->first();
         if (!$user) {
-            $this->replyWithMessage(['text' => '请先使用/bind 绑定fc']);
+            Request::sendMessage(['text' => '请先使用/bind 绑定fc', 'chat_id' => $chatId]);
             return;
         }
         
@@ -48,6 +54,6 @@ class QuotaCommand extends Command
 
         Price::quota($user, $price);
 
-        $this->replyWithMessage(['text' => '报价已更新']);
+        Request::sendMessage(['text' => '报价已更新', 'chat_id' => $chatId]);
     }
 }

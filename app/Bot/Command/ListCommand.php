@@ -1,28 +1,31 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
+use App\Bot\Commands\ValidTrait;
 use App\Models\Price;
 use App\Models\User;
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
 
-class ListCommand extends Command
+class ListCommand extends UserCommand
 {
     use ValidTrait;
 
     protected $name = "list";
 
     protected $description = "列出当前最高报价 仅显示最高十条";
+    protected $usage = '/test';
 
-    public function handle($arguments)
+    public function execute()
     {
         $from = $this->update->getMessage()->getFrom();
         $chat = $this->update->getMessage()->getChat();
         $chatType = $chat->getType();
+        $chatId = $chat->getId();
 
         if ($chatType != 'group' && $chatType != 'supergroup') {
-            $this->replyWithMessage(['text' => '请在群组中使用该命令']);
+            Request::sendMessage(['text' => '请在群组中使用该命令', 'chat_id' => $chatId]);
             return;
         }
 
@@ -52,7 +55,7 @@ class ListCommand extends Command
             ->get();
 
         if ($prices->count() == 0) {
-            $this->replyWithMessage(['text' => '暂无报价']);
+            Request::sendMessage(['text' => '暂无报价', 'chat_id' => $chatId]);
             return ;
         }
         $typeString = $type == Price::TYPE_MORNING ? '上午' : '下午';
@@ -94,6 +97,6 @@ class ListCommand extends Command
                 $responseText .= "  -  角色名: <del>{$characterName}</del>  -  岛名: <del>{$islandName}</del>";
             }
         }
-        $this->replyWithMessage(['text' => $responseText, 'parse_mode' => 'HTML']);
+        Request::sendMessage(['text' => $responseText, 'parse_mode' => 'HTML', 'chat_id' => $chatId]);
     }
 }
