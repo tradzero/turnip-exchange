@@ -1,27 +1,33 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
 use App\Models\User;
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
 
-class BindCommand extends Command
+class BindCommand extends UserCommand
 {
     protected $name = "bind";
 
     protected $description = "绑定friend code 格式为 /bind [friendcode] [角色名] [岛名] 或 /bind [friendcode]";
+    protected $chatId;
 
-    public function handle($arguments)
+    public function execute()
     {
+        $arguments = $this->getMessage()->getText(true);
         $bindArguments = $arguments;
+
+        $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
+        $this->chatId = $chatId;
 
         $from = $this->update->getMessage()->getFrom();
 
         $tgid = $from->getId();
         $user = User::where('tg_id', $tgid)->first();
         if ($user) {
-            $this->replyWithMessage(['text' => '您已绑定FC 请勿重复操作']);
+            Request::sendMessage(['text' => '您已绑定FC 请勿重复操作', 'chat_id' => $chatId]);
             return ;
         }
 
@@ -32,7 +38,7 @@ class BindCommand extends Command
         
         if ($argumentsCount > 1) {
             if ($argumentsCount != 3) {
-                $this->replyWithMessage(['text' => '格式错误 正确格式应为 /bind [friendcode] [角色名] [岛名] (注意 岛名与角色名不应该包含空格)']);
+                Request::sendMessage(['text' => '格式错误 正确格式应为 /bind [friendcode] [角色名] [岛名] (注意 岛名与角色名不应该包含空格)', 'chat_id' => $chatId]);
                 return;
             }
             list(, $characterName, $islandName) = explode(' ', $bindArguments);
@@ -57,7 +63,7 @@ class BindCommand extends Command
 
         $user->save();
         
-        $this->replyWithMessage(['text' => '绑定成功']);
+        Request::sendMessage(['text' => '绑定成功', 'chat_id' => $chatId]);
     }
 
     protected function vaildateFriendCode($friendCode)
@@ -66,7 +72,7 @@ class BindCommand extends Command
         $regex = '/^SW-[0-9]{4}-[0-9]{4}-[0-9]{4}$/';
         $result = preg_match($regex, $friendCode);
         if (! $result) {
-            $this->replyWithMessage(['text' => 'FC格式错误 正确格式为 SW-1234-1111-1111']);
+            Request::sendMessage(['text' => 'FC格式错误 正确格式为 SW-1234-1111-1111', 'chat_id' => $this->chatId]);
             return false;
         }
         return true;
