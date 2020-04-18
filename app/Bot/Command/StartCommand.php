@@ -1,32 +1,35 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Telegram\Bot\Actions;
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\ChatAction;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
 
-class StartCommand extends Command
+class StartCommand extends UserCommand
 {
     protected $name = "start";
 
-    // protected $description = "帮助";
+    protected $description = "帮助";
 
-    public function handle($arguments)
+    public function execute()
     {
-        $this->replyWithMessage(['text' => '欢迎使用大头菜报价系统 现在可以接受以下命令']);
+        $chatId = $this->getMessage()->getChat()->getId();
+        Request::sendMessage(['text' => '欢迎使用大头菜报价系统 现在可以接受以下命令', 'chat_id' => $chatId]);
 
-        // This will update the chat status to typing...
-        $this->replyWithChatAction(['action' => Actions::TYPING]);
+        Request::sendChatAction(['action' => ChatAction::TYPING,  'chat_id' => $chatId]);
 
-        $commands = $this->getTelegram()->getCommands();
+        $commands = $this->telegram->getCommandsList();
 
         // Build the list
         $response = '';
-        foreach ($commands as $name => $command) {
-            $response .= sprintf('/%s - %s' . PHP_EOL, $name, $command->getDescription());
+        foreach ($commands as $command) {
+            if (!$command->isSystemCommand() && $command->showInHelp() && $command->isEnabled()) {
+                $response .= sprintf('/%s - %s'.PHP_EOL, $command->getName(), $command->getDescription());
+            }
         }
 
         // Reply with the commands list
-        $this->replyWithMessage(['text' => $response]);
+        Request::sendMessage(['text' => $response, 'chat_id' => $chatId]);
     }
 }

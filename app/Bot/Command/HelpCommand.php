@@ -1,24 +1,27 @@
 <?php
 
-namespace App\Bot\Commands;
+namespace Longman\TelegramBot\Commands\UserCommands;
 
-use Telegram\Bot\Commands\Command;
+use Longman\TelegramBot\Commands\UserCommand;
+use Longman\TelegramBot\Request;
 
-class HelpCommand extends Command
+class HelpCommand extends UserCommand
 {
     protected $name = 'help';
 
     protected $description = '显示可用命令';
 
-    public function handle($arguments)
+    public function execute()
     {
-        $commands = $this->telegram->getCommands();
+        $chatId = $this->getMessage()->getChat()->getId();
 
+        $commands = $this->telegram->getCommandsList();
         $text = '';
-        foreach ($commands as $name => $handler) {
-            $text .= sprintf('/%s - %s'.PHP_EOL, $name, $handler->getDescription());
+        foreach ($commands as $command) {
+            if (!$command->isSystemCommand() && $command->showInHelp() && $command->isEnabled()) {
+                $text .= sprintf('/%s - %s'.PHP_EOL, $command->getName(), $command->getDescription());
+            }
         }
-
-        $this->replyWithMessage(compact('text'));
+        Request::sendMessage(['text' => $text, 'chat_id' => $chatId]);
     }
 }
