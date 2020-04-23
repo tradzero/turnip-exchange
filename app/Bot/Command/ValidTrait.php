@@ -2,10 +2,15 @@
 
 namespace App\Bot\Commands;
 
+use Longman\TelegramBot\Request;
+
 trait ValidTrait
 {
     protected function checkTime()
     {
+        $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
+
         if (config('turnip.debug')) {
             return true;
         }
@@ -17,12 +22,12 @@ trait ValidTrait
 
         $hour = $now->hour;
         if ($hour >= 0 && $hour < 8) {
-            $this->replyWithMessage(['text' => '早上8点才开市']);
+            Request::sendMessage(['text' => '早上8点才开市', 'chat_id' => $chatId]);
             return false;
         }
 
         if ($hour >= 22) {
-            $this->replyWithMessage(['text' => '今天已经收摊了']);
+            Request::sendMessage(['text' => '今天已经收摊了', 'chat_id' => $chatId]);
             return false;
         }
         return true;
@@ -30,8 +35,11 @@ trait ValidTrait
 
     protected function checkPrice($price)
     {
+        $chat = $this->update->getMessage()->getChat();
+        $chatId = $chat->getId();
+        
         if ($price == '') {
-            $this->replyWithMessage(['text' => '价格错误 请使用 /add [价格] 添加报价']);
+            Request::sendMessage(['text' => '价格错误 请使用 /add [价格] 添加报价', 'chat_id' => $chatId]);
             return false;
         }
         $minPrice = 1;
@@ -41,7 +49,7 @@ trait ValidTrait
             $maxPrice = 110;
         }
         if (! is_numeric($price) || $price < $minPrice || $price > $maxPrice) {
-            $this->replyWithMessage(['text' => "请输入正确的价格格式 区间为{$minPrice}-{$maxPrice}"]);
+            Request::sendMessage(['text' => "请输入正确的价格格式 区间为{$minPrice}-{$maxPrice}", 'chat_id' => $chatId]);
             return false;
         }
 

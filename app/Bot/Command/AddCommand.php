@@ -28,7 +28,7 @@ class AddCommand extends UserCommand
         $from = $this->update->getMessage()->getFrom();
         $chat = $this->update->getMessage()->getChat();
         $chatId = $chat->getId();
-
+        
         $chatType = $chat->getType();
         if ($chatType != 'group' && $chatType != 'supergroup') {
             Request::sendMessage(['text' => '请在群组中使用该命令', 'chat_id' => $chatId]);
