@@ -3,6 +3,7 @@
 namespace Longman\TelegramBot\Commands\SystemCommands;
 
 use App\Models\Price;
+use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -29,7 +30,6 @@ class CallbackqueryCommand extends SystemCommand
     public function execute()
     {
         $callbackQuery    = $this->getCallbackQuery();
-        $callbackQueryId = $callbackQuery->getId();
         $callbackData     = $callbackQuery->getData();
         $this->callback = $callbackQuery;
 
@@ -37,16 +37,13 @@ class CallbackqueryCommand extends SystemCommand
             $this->handleDateComplement($callbackData);
         } elseif (Str::startsWith($callbackData, 'complement_')) {
             $this->chooseComplementType($callbackData);
+        } elseif (Str::startsWith($callbackData, 'setting_')) {
+            if (Str::startsWith($callbackData, 'setting_private')) {
+                $this->settingPrivate($callbackData);
+            }
         }
 
-        $data = [
-            'callback_query_id' => $callbackQueryId,
-            'text'              => 'Hello World!',
-            'show_alert'        => $callbackData === 'thumb up',
-            'cache_time'        => 5,
-        ];
-
-        return Request::answerCallbackQuery($data);
+        return Request::emptyResponse();
     }
 
     // 响应类型
@@ -108,6 +105,68 @@ class CallbackqueryCommand extends SystemCommand
         Cache::put($key, ['user_id' => $userId, 'date' => $date, 'type' => $type], 60 * 10);
 
         Request::sendMessage(['text' => '请回复补录的价格 价格区间 0-1000', 'chat_id' => $chatId]);
+    }
+
+    protected function settingPrivate($callbackData)
+    {
+        $callbackQuery = $this->callback;
+        $message = $callbackQuery->getMessage();
+        $chatId = $message->getChat()->getId();
+
+        $this->removeMessage();
+
+        $user = $this->getUser();
+        if (! $user) {
+            return Request::emptyResponse();
+        }
+
+        $privateSetting = Str::after($callbackData, 'setting_private');
+
+        $setting = $user->setting;
+        if (! $setting) {
+            $setting = new Setting();
+            $setting->user_id = $user->id;
+            $setting->save();
+        }
+
+        if ($privateSetting != '') {
+            $privateSetting = Str::after($privateSetting, '_');
+            $privateSetting = (bool) $privateSetting;
+            $setting->private_mode = $privateSetting;
+            $setting->save();
+            Request::sendMessage(['text' => '设置成功', 'chat_id' => $chatId]);
+            return ;
+        }
+        
+
+        $settings = [
+            ['name' => '开启 (不显示FC)', 'callback' => 'setting_private_1'],
+            ['name' => '关闭 (显示FC)', 'callback' => 'setting_private_0'],
+        ];
+
+        $inlineKeyBoardButtons = collect($settings)->map(function ($item) {
+            return ['text' => $item['name'], 'callback_data' => $item['callback']];
+        })->toArray();
+
+        $inlineKeyboard = new InlineKeyboard($inlineKeyBoardButtons);
+
+        $currentSetting = $setting->private_mode ? '开启' : '关闭';
+        $data = [
+            'chat_id'      => $chatId,
+            'text'         => "请选择是否开启隐私模式 当前设置: {$currentSetting}",
+            'reply_markup' => $inlineKeyboard,
+        ];
+        return Request::sendMessage($data);
+    }
+
+    protected function getUser()
+    {
+        $callbackQuery = $this->callback;
+        $message = $callbackQuery->getMessage();
+
+        $tgid = $message->getChat()->getId();
+        $user = User::where('tg_id', $tgid)->first();
+        return $user;
     }
 
     protected function removeMessage()

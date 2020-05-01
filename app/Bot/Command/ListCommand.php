@@ -47,7 +47,7 @@ class ListCommand extends UserCommand
         }
 
         $orderBy = $isSunday ? 'asc' : 'desc';
-        $prices = Price::with('user')
+        $prices = Price::with('user.setting')
             ->where('date', $date)
             ->where('type', $type)
             ->orderBy('price', $orderBy)
@@ -67,11 +67,20 @@ class ListCommand extends UserCommand
         }
 
         foreach ($prices as $rank => $price) {
+            $user = $price->user;
+            $setting = $user->setting;
+
             $rank = $rank + 1;
             $quota = $price->price;
-            $fcCode = $price->user->friend_code_id;
-            $characterName = $price->user->character_name;
-            $islandName = $price->user->island_name;
+            
+            if ($setting && optional($setting)->private_mode) {
+                $fcCode = '已隐藏';
+            } else {
+                $fcCode = $user->friend_code_id;
+            }
+
+            $characterName = $user->character_name;
+            $islandName = $user->island_name;
 
             $responseText .= "{$rank} - 报价 : <b>{$quota}</b>  -  FC: {$fcCode}";
             if ($characterName) {
@@ -87,10 +96,17 @@ class ListCommand extends UserCommand
                 ->orderBy('price', 'asc')
                 ->first();
 
+            $user = $lowestPrice->user;
+            $setting = $user->setting;
+            
             $quota = $lowestPrice->price;
-            $fcCode = $lowestPrice->user->friend_code_id;
-            $characterName = $lowestPrice->user->character_name;
-            $islandName = $lowestPrice->user->island_name;
+            if ($setting && optional($setting)->private_mode) {
+                $fcCode = '已隐藏';
+            } else {
+                $fcCode = $user->friend_code_id;
+            }
+            $characterName = $user->character_name;
+            $islandName = $user->island_name;
 
             $responseText .= "本时段<del>欧皇</del>报价: <b>{$quota}</b> -  FC: <del>{$fcCode}</del>";
             if ($characterName) {
