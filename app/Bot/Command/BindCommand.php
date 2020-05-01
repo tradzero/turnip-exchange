@@ -10,7 +10,7 @@ class BindCommand extends UserCommand
 {
     protected $name = "bind";
 
-    protected $description = "绑定friend code 格式为 /bind [friendcode] [角色名] [岛名] 或 /bind [friendcode]";
+    protected $description = "绑定friend code 格式为 /bind <friendcode> <角色名> <岛名> 或 /bind <friendcode>";
     protected $chatId;
 
     public function execute()
@@ -39,7 +39,7 @@ class BindCommand extends UserCommand
         
         if ($argumentsCount > 1) {
             if ($argumentsCount != 3) {
-                Request::sendMessage(['text' => '格式错误 正确格式应为 /bind [friendcode] [角色名] [岛名] (注意 岛名与角色名不应该包含空格)', 'chat_id' => $chatId]);
+                Request::sendMessage(['text' => '格式错误 正确格式应为 /bind <friendcode> <角色名> <岛名> 如: /bind SW-1234-1111-1111 我是谁 什么岛 (注意 岛名与角色名不应该包含空格)', 'chat_id' => $chatId]);
                 return;
             }
             list(, $characterName, $islandName) = explode(' ', $bindArguments);
@@ -73,7 +73,9 @@ class BindCommand extends UserCommand
         $regex = '/^SW-[0-9]{4}-[0-9]{4}-[0-9]{4}$/';
         $result = preg_match($regex, $friendCode);
         if (! $result) {
-            Request::sendMessage(['text' => 'FC格式错误 正确格式为 SW-1234-1111-1111', 'chat_id' => $this->chatId]);
+            $text = 'FC格式错误 正确格式为 SW-1234-1111-1111 如 /bind SW-1234-1111-1111' . PHP_EOL;
+            $text .= '或者使用 /bind SW-1234-1111-1111 我是谁 什么岛 (注意 岛名与角色名不应该包含空格) 绑定更详细内容';
+            Request::sendMessage(['text' => $text, 'chat_id' => $this->chatId]);
             return false;
         }
         return true;
