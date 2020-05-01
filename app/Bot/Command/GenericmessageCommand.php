@@ -9,8 +9,12 @@ use Longman\TelegramBot\Commands\SystemCommand;
 use Longman\TelegramBot\Conversation;
 use Longman\TelegramBot\Request;
 
+use App\Bot\Commands\ValidTrait;
+
 class GenericmessageCommand extends SystemCommand
 {
+    use ValidTrait;
+
     protected $name = 'genericmessage';
 
     protected $description = '处理常规消息';
@@ -56,6 +60,11 @@ class GenericmessageCommand extends SystemCommand
             return Request::emptyResponse();
         }
 
+        $priceValid = $this->checkPrice($price);
+        if (!$priceValid) {
+            return;
+        }
+        
         Price::quotaByDate($user, $price, $data['date'], $data['type']);
         Cache::forget($key);
         Request::sendMessage(['text' => '报价已更新', 'chat_id' => $tgid]);
