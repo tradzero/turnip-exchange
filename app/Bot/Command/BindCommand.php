@@ -26,6 +26,7 @@ class BindCommand extends UserCommand
 
         $tgid = $from->getId();
         $user = User::where('tg_id', $tgid)->first();
+        
         if ($user) {
             Request::sendMessage(['text' => '您已绑定FC 请勿重复操作', 'chat_id' => $chatId]);
             return ;

@@ -33,4 +33,11 @@ class Price extends Model
             'price' => (int) $price,
         ]);
     }
+
+    public static function quotaByDate($user, $price, $date, $type)
+    {
+        self::updateOrCreate(['user_id' => $user->id, 'date' => $date, 'type'=> $type], [
+            'price' => (int) $price,
+        ]);
+    }
 }
