@@ -80,10 +80,30 @@ class WeekCommand extends UserCommand
 
         $previewUrl = $baseUrl . 'p-' . $queryString . '.png';
         
+        $turnipprophetUrl = $this->buildTurnipprophetUrl($prices);
 
-        $baseText = "[趋势预览]({$previewUrl}) 本周您的报价如下: 可以使用 [点我]({$queryUrl}) 查询本周价格趋势" . PHP_EOL;
+        $baseText = "[趋势预览]({$previewUrl}) 本周您的报价如下: 可以使用 [点我(ac-turnip)]({$queryUrl}) 或者[点我(turnipprophet)]({$turnipprophetUrl}) 查询本周价格趋势" . PHP_EOL;
 
         $responseText = $baseText . $headerText . $textString;
         Request::sendMessage(['text' => $responseText, 'parse_mode' => 'Markdown', 'chat_id' => $chatId]);
+    }
+
+    public function buildTurnipprophetUrl($prices)
+    {
+        $baseUrl = 'https://turnipprophet.io/?prices=';
+
+        $queryString = '';
+
+        foreach ($prices as $price) {
+            $queryString .= implode('.', $price);
+            $queryString .= '.';
+        }
+
+        $queryString = str_replace('$', '', $queryString);
+        $queryString = rtrim($queryString, '.');
+
+        $url = $baseUrl . $queryString;
+
+        return $url;
     }
 }
