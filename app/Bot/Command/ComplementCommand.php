@@ -2,6 +2,7 @@
 
 namespace Longman\TelegramBot\Commands\UserCommands;
 
+use App\Models\User;
 use Longman\TelegramBot\ChatAction;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\InlineKeyboard;
@@ -18,12 +19,21 @@ class ComplementCommand extends UserCommand
 
     public function execute()
     {
+        $from = $this->update->getMessage()->getFrom();
+
         $chatId = $this->getMessage()->getChat()->getId();
 
         $chatType = $this->getMessage()->getChat()->getType();
 
         if ($chatType != 'private') {
             Request::sendMessage(['text' => '请在私聊中使用该命令', 'chat_id' => $chatId]);
+            return;
+        }
+
+        $tgid = $from->getId();
+        $user = User::where('tg_id', $tgid)->first();
+        if (!$user) {
+            Request::sendMessage(['text' => '请先使用/bind 绑定fc', 'chat_id' => $chatId]);
             return;
         }
 
