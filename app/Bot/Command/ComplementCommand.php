@@ -51,7 +51,7 @@ class ComplementCommand extends UserCommand
         $period = $start->daysUntil($end);
         foreach ($period as $index => $day) {
             if ($now->gt($day)) {
-                $allowItems[] = ['date' => $day->toDateTimeString(), 'name' => $day->getTranslatedDayName()];
+                $allowItems[] = ['date' => $day->toDateTimeString(), 'name' => $day->getTranslatedDayName(null, '_short')];
             }
         }
 
