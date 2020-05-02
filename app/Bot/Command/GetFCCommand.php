@@ -35,7 +35,14 @@ class GetFCCommand extends UserCommand
             return ;
         }
 
-        $responseText = "FC: {$user->friend_code_id}";
+        $setting = $user->setting;
+
+        if ($setting && optional($setting)->private_mode) {
+            $fcCode = '已隐藏';
+        } else {
+            $fcCode = $user->friend_code_id;
+        }
+        $responseText = "FC: {$fcCode}";
         $characterName = $user->character_name;
         $islandName = $user->island_name;
 
