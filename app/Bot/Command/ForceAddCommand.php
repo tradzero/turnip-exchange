@@ -22,9 +22,9 @@ class ForceAddCommand extends UserCommand
     {
         $arguments = $this->getMessage()->getText(true);
         $from = $this->update->getMessage()->getFrom();
-
         $chat = $this->update->getMessage()->getChat();
         $chatId = $chat->getId();
+
         $this->chatId = $chatId;
 
         $replyTo = $this->update->getMessage()->getReplyToMessage();
@@ -33,7 +33,6 @@ class ForceAddCommand extends UserCommand
             return ;
         }
 
-        $chat = $this->update->getMessage()->getChat();
         $chatType = $chat->getType();
         if ($chatType != 'group' && $chatType != 'supergroup') {
             Request::sendMessage(['text' => '请在群组中使用该命令', 'chat_id' => $chatId]);
@@ -43,11 +42,11 @@ class ForceAddCommand extends UserCommand
         $replyUser = $replyTo->getFrom()->getId();
         $fromUser = $from->getId();
         
-        $adminsIds = config('turnip.admins');
-
-        // 只有自己或者管理员有权限可以强制报价
-        if (! in_array($fromUser, $adminsIds) && $replyUser != $fromUser) {
-            return ;
+        if ($replyUser != $fromUser) {
+            // 如果不是自己forceadd 检查是否是管理员
+            if (! $this->checkAdmin($fromUser)) {
+                return ;
+            }
         }
 
         $price = $this->checkReplyCommand($replyTo);
@@ -96,5 +95,25 @@ class ForceAddCommand extends UserCommand
         } else {
             return false;
         }
+    }
+
+    protected function checkAdmin($tgid)
+    {
+        $chatId = $this->getMessage()->getChat()->getId();
+        $admins = Request::getChatAdministrators(['chat_id' => $chatId]);
+
+        $isAdmin = false;
+
+        if ($admins->isOk()) {
+            $admins = $admins->getResult();
+            foreach ($admins as $admin) {
+                $adminId = $admin->getUser()->id;
+                if ($adminId === $tgid) {
+                    $isAdmin = true;
+                    break;
+                }
+            }
+        }
+        return $isAdmin;
     }
 }
