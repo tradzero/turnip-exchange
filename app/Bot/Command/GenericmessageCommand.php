@@ -27,6 +27,7 @@ class GenericmessageCommand extends SystemCommand
     {
         $chatId = $this->getMessage()->getChat()->getId();
         $tgid = $this->getMessage()->getFrom()->getId();
+        
         $this->handleComplement($tgid);
 
         return Request::emptyResponse();
@@ -55,6 +56,8 @@ class GenericmessageCommand extends SystemCommand
         if (! $data) {
             return Request::emptyResponse();
         }
+        dump($key);
+        dump($data);
         $user = User::find($data['user_id'])->first();
         if (! $user) {
             return Request::emptyResponse();
