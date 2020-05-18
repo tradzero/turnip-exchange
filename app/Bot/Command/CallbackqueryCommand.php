@@ -92,8 +92,6 @@ class CallbackqueryCommand extends SystemCommand
 
         $tgid = $message->getChat()->getId();
         $user = User::where('tg_id', $tgid)->first();
-        dump($callbackData);
-        dump($user->id);
         if (! $user) {
             return Request::emptyResponse();
         }
@@ -102,7 +100,6 @@ class CallbackqueryCommand extends SystemCommand
         list(, $date, $type) = explode('_', $callbackData);
         $this->removeMessage();
         // KEY COMPLEMENT_{USER_ID} VALUE [DATE, TYPE]
-        dump($tgid);
         $key = "COMPLEMENT_{$tgid}";
         Cache::put($key, ['user_id' => $userId, 'date' => $date, 'type' => $type], 60 * 10);
 

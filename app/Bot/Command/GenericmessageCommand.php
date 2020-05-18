@@ -56,8 +56,6 @@ class GenericmessageCommand extends SystemCommand
         if (! $data) {
             return Request::emptyResponse();
         }
-        dump($key);
-        dump($data);
         $user = User::find($data['user_id'])->first();
         if (! $user) {
             return Request::emptyResponse();
