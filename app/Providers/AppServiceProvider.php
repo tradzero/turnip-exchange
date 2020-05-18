@@ -16,13 +16,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        Log::info('============ URL: '.request()->fullUrl().' ===============');
-        DB::listen(function (QueryExecuted $query) {
-            Log::info($query->time);
-            $sqlWithPlaceholders = str_replace(['%', '?'], ['%%', '%s'], $query->sql);
-            $bindings = $query->connection->prepareBindings($query->bindings);
-            $pdo = $query->connection->getPdo();
-            Log::info(vsprintf($sqlWithPlaceholders, array_map([$pdo, 'quote'], $bindings)));
-        });
+        // Log::info('============ URL: '.request()->fullUrl().' ===============');
+        // DB::listen(function (QueryExecuted $query) {
+        //     Log::info($query->time);
+        //     $sqlWithPlaceholders = str_replace(['%', '?'], ['%%', '%s'], $query->sql);
+        //     $bindings = $query->connection->prepareBindings($query->bindings);
+        //     $pdo = $query->connection->getPdo();
+        //     Log::info(vsprintf($sqlWithPlaceholders, array_map([$pdo, 'quote'], $bindings)));
+        // });
     }
 }
